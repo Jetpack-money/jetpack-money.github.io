@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jetpack Money</title>
+<meta name="description" content="Jetpack Money: a budget app with a stock market course built in. For education only. Not financial or investment advice.">
+<meta name="robots" content="noai, noimageai">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility_new,account_balance_wallet,arrow_downward,arrow_drop_down,arrow_upward,bolt,check,check_circle,close,contrast,delete,error,expand_less,expand_more,flag,format_bold,format_size,home,info,lightbulb,local_fire_department,lock,notifications,notifications_active,play_arrow,radio_button_unchecked,record_voice_over,route,school,settings,shield,show_chart,sports_esports,star,task_alt,timer,view_agenda,warning&display=block" rel="stylesheet">
+<style>
+  :root { --fieldbg: #fff; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body { background: #FFFFFF; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", "Noto Sans SC", sans-serif;
+         -webkit-font-smoothing: antialiased; transition: background .2s; }
+  #app { max-width: 480px; margin: 0 auto; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+  .ms { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal; line-height: 1; letter-spacing: normal;
+        text-transform: none; display: inline-block; white-space: nowrap; direction: ltr; flex-shrink: 0; font-feature-settings: 'liga'; }
+  button { font-family: inherit; border: 0; background: none; padding: 0; margin: 0; cursor: pointer; }
+  button:disabled { cursor: default; }
+  .tap { -webkit-tap-highlight-color: transparent; transition: filter .12s, transform .08s; }
+  .tap:hover { filter: brightness(0.97); }
+  .tap:active, .fb:active:not(:disabled) { transform: scale(0.99); }
+  :focus-visible { outline: 3px solid #155BEE; outline-offset: 2px; }
+  .fb { display: flex; align-items: center; justify-content: center; padding: 0 16px; white-space: nowrap; box-sizing: border-box; }
+  .tb { flex: 0 0 auto; padding: 8px 12px; font-size: 14px; font-weight: 600; }
+  .ib { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 20px; }
+  .ib:hover { background: rgba(127,127,127,.12); }
+  .badge { position: absolute; top: 4px; right: 4px; background: #E5484D; color: #fff; font-size: 10px; font-weight: 700; border-radius: 8px; padding: 0 5px; line-height: 15px; }
+  .tf { position: relative; display: block; flex-shrink: 0; }
+  .tfl { position: absolute; top: -8px; left: 10px; padding: 0 4px; font-size: 12px; background: var(--fieldbg); z-index: 1; }
+  .tfb { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 12px; padding: 0 14px; min-height: 48px; box-sizing: border-box; }
+  .tfb input, .tfb select { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 16px; padding: 12px 0; }
+  .tfb.sel { padding-right: 6px; } .tfb.sel select { appearance: none; -webkit-appearance: none; cursor: pointer; }
+  .tfb.sel .ms { pointer-events: none; }
+  .tfb:focus-within { border-color: #155BEE !important; box-shadow: 0 0 0 1px #155BEE; }
+  select option { color: #11152A; background: #fff; }
+  .err { color: #E5484D; font-size: 12px; margin: 4px 12px 0; }
+  .sw { width: 46px; height: 26px; border-radius: 13px; position: relative; flex-shrink: 0; }
+  .sw span { position: absolute; top: 3px; width: 20px; height: 20px; border-radius: 10px; background: #fff; }
+  .cbw { display: flex; align-items: center; gap: 12px; text-align: left; }
+  .cb { width: 20px; height: 20px; border-radius: 5px; border: 2px solid; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .scroll { scrollbar-width: thin; overscroll-behavior: contain; }
+  .scroll > * { flex: 0 0 auto !important; }
+  #toast { position: absolute; left: 16px; right: 16px; bottom: 88px; background: #171C2F; color: #fff; border-radius: 12px; padding: 14px 16px;
+           font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; transform: translateY(8px);
+           transition: opacity .2s, transform .2s; pointer-events: none; z-index: 10; }
+  #toast.show { opacity: 1; transform: none; }
+  #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+             background: #171C2F; color: #fff; z-index: 20; text-align: center; padding: 24px; }
+  #loading img { width: 88px; height: 88px; border-radius: 24px; }
+  #loading .bar { width: 180px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+  #loading .bar i { display: block; height: 100%; width: 30%; border-radius: 3px; background: linear-gradient(90deg,#155BEE,#24D349); animation: load 1.2s ease-in-out infinite; }
+  #loading small { color: #A0A6BD; font-size: 12px; max-width: 280px; }
+  @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(330%); } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div id="app" aria-live="polite">
+  <div id="screen" style="display:flex;flex-direction:column;flex:1 1 0;min-height:0;"></div>
+  <div id="toast" role="status"></div>
+  <div id="loading"><img src="icon.png" alt="Jetpack Money"><strong style="font-size:20px">Jetpack Money</strong>
+    <div class="bar"><i></i></div><span id="loadmsg" style="font-size:13px;color:#A0A6BD">Getting ready…</span>
+    <small>For education only. Not financial or investment advice.<br>© 2026 Jetpack Money. All rights reserved.</small></div>
+</div>
+<script src="app.js"></script>
+<script>
+(function () {
+  const PYODIDE = window.PYODIDE_BASE || "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/";
+  const screen = document.getElementById("screen");
+  const toastEl = document.getElementById("toast");
+  let lastSig = "", toastTimer = null, py = null;
+
+  function signature() {
+    const s = screen.querySelector("[data-scroll]");
+    return s ? (s.textContent || "").slice(0, 60) : "";
+  }
+  window.__jpRender = function (html, bg) {
+    const scrolls = [...screen.querySelectorAll("[data-scroll]")].map(e => e.scrollTop);
+    const sig = signature();
+    const active = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.cid : null;
+    screen.innerHTML = html;
+    document.body.style.background = bg;
+    if (sig && sig === signature()) {
+      screen.querySelectorAll("[data-scroll]").forEach((e, i) => { if (scrolls[i]) e.scrollTop = scrolls[i]; });
+    }
+    if (active) { const a = screen.querySelector('[data-cid="' + active + '"]'); if (a && a.tagName === "INPUT") a.focus(); }
+  };
+  window.__jpToast = function (text) {
+    if (!text) return;
+    toastEl.textContent = text; toastEl.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200);
+  };
+  function send(cid, kind, value) {
+    if (!py) return;
+    py.globals.get("jp_event")(cid, kind, value === undefined ? null : value);
+  }
+  screen.addEventListener("click", function (ev) {
+    const el = ev.target.closest("[data-cid]");
+    if (!el || el.disabled) return;
+    const kind = el.dataset.ev;
+    if (kind === "click" || kind === "toggle") { ev.preventDefault(); send(el.dataset.cid, kind); }
+  });
+  screen.addEventListener("keydown", function (ev) {
+    if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches('[data-ev="click"][tabindex]')) {
+      ev.preventDefault(); send(ev.target.dataset.cid, "click");
+    }
+  });
+  screen.addEventListener("input", function (ev) {
+    const el = ev.target;
+    if (el.tagName !== "INPUT" || !el.dataset.cid) return;
+    if (el.dataset.filter) {
+      const re = new RegExp(el.dataset.filter);
+      const clean = [...el.value].filter(ch => re.test(ch)).join("");
+      if (clean !== el.value) el.value = clean;
+    }
+    send(el.dataset.cid, "change", el.value);
+  });
+  screen.addEventListener("change", function (ev) {
+    const el = ev.target;
+    if (el.tagName === "SELECT" && el.dataset.cid) send(el.dataset.cid, "select", el.value);
+  });
+
+  async function start() {
+    const msg = document.getElementById("loadmsg");
+    try {
+      const s = document.createElement("script");
+      s.src = PYODIDE + "pyodide.js";
+      await new Promise((ok, bad) => { s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+      msg.textContent = "Starting the app…";
+      py = await loadPyodide({ indexURL: PYODIDE });
+      py.globals.set("JP_BUNDLE", window.__JP_APP);
+      await py.runPythonAsync(`
+import base64, zlib, json, os, sys
+files = json.loads(zlib.decompress(base64.b64decode(JP_BUNDLE)).decode("utf-8"))
+os.makedirs("/app/flet", exist_ok=True)
+for name, text in files.items():
+    with open("/app/" + name, "w", encoding="utf-8") as f:
+        f.write(text)
+os.chdir("/app")
+sys.path.insert(0, "/app")
+exec(open("/app/boot.py", encoding="utf-8").read(), globals())
+`);
+      document.getElementById("loading").remove();
+    } catch (e) {
+      console.error(e);
+      msg.textContent = "Couldn't start. Check your internet and refresh the page.";
+    }
+  }
+  start();
+})();
+</script>
+</body>
+</html>
