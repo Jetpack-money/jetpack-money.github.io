@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility_new,account_balance_wallet,arrow_downward,arrow_drop_down,arrow_upward,bolt,check,check_circle,close,contrast,delete,error,expand_less,expand_more,flag,format_bold,format_size,home,info,lightbulb,local_fire_department,lock,notifications,notifications_active,play_arrow,radio_button_unchecked,record_voice_over,route,school,settings,shield,show_chart,sports_esports,star,task_alt,timer,view_agenda,warning&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&icon_names=accessibility_new,account_balance_wallet,arrow_downward,arrow_drop_down,arrow_upward,bolt,check,check_circle,close,contrast,delete,error,expand_less,expand_more,flag,format_bold,format_size,home,info,lightbulb,local_fire_department,lock,notifications,notifications_active,pause,play_arrow,radio_button_unchecked,record_voice_over,replay,route,school,settings,shield,show_chart,sports_esports,star,task_alt,timer,view_agenda,volume_down,volume_off,volume_up,warning&display=block" rel="stylesheet">
 <style>
   :root { --fieldbg: #fff; }
   html, body { margin: 0; padding: 0; height: 100%; }
@@ -56,6 +56,37 @@
   #loading .bar i { display: block; height: 100%; width: 30%; border-radius: 3px; background: linear-gradient(90deg,#155BEE,#24D349); animation: load 1.2s ease-in-out infinite; }
   #loading small { color: #A0A6BD; font-size: 12px; max-width: 280px; }
   @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(330%); } }
+
+  /* chart refresher player */
+  #rf { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+        background: rgba(5,8,18,.78); padding: 12px; box-sizing: border-box; }
+  #rf[hidden] { display: none; }
+  .rf-card { width: 100%; max-width: 456px; max-height: 100%; overflow-y: auto; background: #11152A; color: #fff; border-radius: 22px;
+             box-shadow: 0 20px 60px rgba(0,0,0,.5); display: flex; flex-direction: column; }
+  .rf-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px 8px 18px; }
+  .rf-head strong { font-size: 17px; font-weight: 800; }
+  .rf-ib { width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #fff; }
+  .rf-ib:hover { background: rgba(255,255,255,.1); }
+  .rf-vid { position: relative; background: #0A0E1C; aspect-ratio: 648 / 588; }
+  .rf-vid video { width: 100%; height: 100%; display: block; }
+  #rf-big { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(5,8,18,.35); }
+  #rf-big span.circle { width: 76px; height: 76px; border-radius: 38px; background: #155BEE; display: flex; align-items: center; justify-content: center;
+                        box-shadow: 0 6px 24px rgba(21,91,238,.6); }
+  #rf-big[hidden] { display: none; }
+  #rf-sub { min-height: 72px; padding: 12px 18px 6px; font-size: 17px; font-weight: 600; line-height: 1.4; }
+  .rf-dots { display: flex; gap: 4px; padding: 6px 18px 0; }
+  .rf-dots i { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.18); cursor: pointer; }
+  .rf-dots i.on { background: #24D349; }
+  .rf-ctrl { display: flex; align-items: center; gap: 6px; padding: 8px 10px 4px; flex-wrap: wrap; }
+  .rf-ctrl label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CEE0; }
+  .rf-vol { flex: 1 1 150px; display: flex; align-items: center; gap: 8px; padding: 0 8px; min-width: 150px; }
+  .rf-vol input { flex: 1; accent-color: #24D349; height: 28px; }
+  .rf-sw { width: 46px; height: 26px; border-radius: 13px; position: relative; background: #24D349; flex-shrink: 0; }
+  .rf-sw span { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 10px; background: #fff; }
+  .rf-sw[aria-checked="false"] { background: #59607A; } .rf-sw[aria-checked="false"] span { right: auto; left: 3px; }
+  #rf-msg { padding: 2px 18px; font-size: 13px; color: #F5A524; }
+  #rf-msg:empty { display: none; }
+  .rf-note { padding: 6px 18px 16px; font-size: 12px; color: #8C93AD; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -66,6 +97,25 @@
   <div id="loading"><img src="icon.png" alt="Jetpack Money"><strong style="font-size:20px">Jetpack Money</strong>
     <div class="bar"><i></i></div><span id="loadmsg" style="font-size:13px;color:#A0A6BD">Getting ready…</span>
     <small>For education only. Not financial or investment advice.<br>© 2026 Jetpack Money. All rights reserved.</small></div>
+</div>
+<div id="rf" hidden role="dialog" aria-modal="true" aria-labelledby="rf-title">
+  <div class="rf-card">
+    <div class="rf-head"><strong id="rf-title"></strong>
+      <button class="rf-ib" id="rf-x"><span class="ms" style="font-size:26px">close</span></button></div>
+    <div class="rf-vid"><video id="rf-v" playsinline muted preload="auto"></video>
+      <button id="rf-big"><span class="circle"><span class="ms" style="font-size:46px;color:#fff">play_arrow</span></span></button></div>
+    <div class="rf-dots" id="rf-dots"></div>
+    <div id="rf-sub" aria-live="polite"></div>
+    <div id="rf-msg" role="status"></div>
+    <div class="rf-ctrl">
+      <button class="rf-ib" id="rf-pp"><span class="ms" style="font-size:30px">play_arrow</span></button>
+      <button class="rf-ib" id="rf-re"><span class="ms" style="font-size:26px">replay</span></button>
+      <label><button class="rf-sw" id="rf-voice" role="switch" aria-checked="true"><span></span></button><span id="rf-voice-l"></span></label>
+      <div class="rf-vol"><span class="ms" style="font-size:22px;color:#C9CEE0" id="rf-vol-i">volume_up</span>
+        <input type="range" id="rf-vol" min="0" max="100" value="100"></div>
+    </div>
+    <div class="rf-note" id="rf-note"></div>
+  </div>
 </div>
 <script src="app.js"></script>
 <script>
@@ -146,12 +196,128 @@ sys.path.insert(0, "/app")
 exec(open("/app/boot.py", encoding="utf-8").read(), globals())
 `);
       document.getElementById("loading").remove();
+      const rq = new URLSearchParams(location.search).get("refresher");
+      if (rq) setTimeout(() => { try { py.globals.get("jp_open_refresher")(rq); } catch (e) { console.error(e); } }, 700);
     } catch (e) {
       console.error(e);
       msg.textContent = "Couldn't start. Check your internet and refresh the page.";
     }
   }
   start();
+})();
+</script>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const box = $("rf"), v = $("rf-v"), big = $("rf-big"), sub = $("rf-sub"), msg = $("rf-msg"), dots = $("rf-dots");
+  const pp = $("rf-pp"), vsw = $("rf-voice"), vol = $("rf-vol");
+  const synth = window.speechSynthesis;
+  let C = null, seg = 0, playing = false, speaking = false, segDone = false, voiceOn = true, voice = null, raf = 0, back = null, token = 0;
+  try { const s = localStorage.getItem("jp_rf"); if (s) { const o = JSON.parse(s); voiceOn = o.voice !== false; vol.value = o.vol ?? 100; } } catch (e) {}
+  function save() { try { localStorage.setItem("jp_rf", JSON.stringify({ voice: voiceOn, vol: +vol.value })); } catch (e) {} }
+
+  function pickVoice(tag) {
+    if (!synth) return null;
+    const want = tag.toLowerCase(), base = want.split("-")[0];
+    const vs = synth.getVoices().filter(x => (x.lang || "").replace("_", "-").toLowerCase().startsWith(base));
+    if (!vs.length) return null;
+    const score = x => {
+      const n = x.name.toLowerCase(), l = x.lang.replace("_", "-").toLowerCase();
+      return (/natural|neural|online|premium|enhanced/.test(n) ? 8 : 0) + (/google/.test(n) ? 5 : 0) +
+             (l === want ? 3 : 0) + (base === "es" && /-(us|mx|419)/.test(l) ? 2 : 0) + (x.localService ? 0 : 1);
+    };
+    return vs.sort((a, b) => score(b) - score(a))[0];
+  }
+  function setIcon(btn, name) { btn.querySelector(".ms").textContent = name; }
+  function setPlaying(p) {
+    playing = p; big.hidden = p; setIcon(pp, p ? "pause" : "play_arrow");
+    pp.setAttribute("aria-label", p ? C.labels.pause : C.labels.play);
+  }
+  function drawDots() {
+    [...dots.children].forEach((d, i) => d.classList.toggle("on", i <= seg));
+  }
+  function speak(i) {
+    token++;
+    if (synth) synth.cancel();
+    speaking = false;
+    if (!voiceOn || !synth || !voice) return;
+    const u = new SpeechSynthesisUtterance(C.lines[i]);
+    const my = token;
+    u.voice = voice; u.lang = voice.lang; u.volume = vol.value / 100; u.rate = 0.98;
+    u.onend = u.onerror = () => { if (my !== token) return; speaking = false; if (segDone && playing) next(); };
+    speaking = true;
+    synth.speak(u);
+  }
+  function startSeg(i) {
+    seg = i; segDone = false;
+    if (Math.abs(v.currentTime - C.segs[i][0]) > 0.3) v.currentTime = C.segs[i][0];
+    sub.textContent = C.lines[i]; drawDots();
+    speak(i);
+    const r = v.play(); if (r && r.catch) r.catch(() => {});
+  }
+  function next() {
+    if (seg + 1 < C.segs.length) startSeg(seg + 1);
+    else { setPlaying(false); token++; if (synth) synth.cancel(); setIcon(pp, "replay"); seg = C.segs.length; }
+  }
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    if (!playing || segDone || !C) return;
+    if (v.currentTime >= C.segs[seg][1] - 0.04 || v.ended) {
+      segDone = true;
+      if (speaking) v.pause(); else next();
+    }
+  }
+  function play() {
+    if (!C) return;
+    voice = pickVoice(C.voice);
+    msg.textContent = (voiceOn && !voice) ? C.labels.novoice : "";
+    setPlaying(true);
+    startSeg(seg >= C.segs.length ? 0 : seg);
+  }
+  function pause() {
+    setPlaying(false); v.pause(); token++; if (synth) synth.cancel(); speaking = false;
+  }
+  function close() {
+    pause(); cancelAnimationFrame(raf); box.hidden = true; v.removeAttribute("src"); v.load();
+    if (back && back.focus) back.focus();
+  }
+  window.__jpRefresher = function (json) {
+    C = JSON.parse(json); seg = 0; back = document.activeElement;
+    $("rf-title").textContent = C.labels.title;
+    $("rf-x").setAttribute("aria-label", C.labels.close);
+    $("rf-re").setAttribute("aria-label", C.labels.replay);
+    big.setAttribute("aria-label", C.labels.play);
+    $("rf-voice-l").textContent = C.labels.voice;
+    vol.setAttribute("aria-label", C.labels.volume);
+    $("rf-note").textContent = C.note;
+    vsw.setAttribute("aria-checked", voiceOn ? "true" : "false");
+    dots.innerHTML = C.segs.map((_, i) => `<i data-i="${i}" title="${i + 1}"></i>`).join("");
+    sub.textContent = C.lines[0]; msg.textContent = "";
+    v.poster = C.poster; v.src = C.video;
+    setPlaying(false); drawDots();
+    box.hidden = false; $("rf-x").focus();
+    cancelAnimationFrame(raf); loop();
+    if (synth) synth.getVoices();
+  };
+  if (synth) synth.onvoiceschanged = () => { if (C) voice = pickVoice(C.voice); };
+  big.onclick = play;
+  pp.onclick = () => (playing ? pause() : play());
+  $("rf-re").onclick = () => { pause(); seg = 0; play(); };
+  $("rf-x").onclick = close;
+  box.addEventListener("click", e => { if (e.target === box) close(); });
+  document.addEventListener("keydown", e => { if (!box.hidden && e.key === "Escape") close(); });
+  dots.onclick = e => { const i = e.target.dataset && e.target.dataset.i; if (i === undefined) return; pause(); seg = +i; play(); };
+  vsw.onclick = () => {
+    voiceOn = !voiceOn; vsw.setAttribute("aria-checked", voiceOn ? "true" : "false"); save();
+    if (!voiceOn) { token++; if (synth) synth.cancel(); speaking = false; msg.textContent = ""; if (segDone && playing) next(); }
+    else if (playing) { voice = pickVoice(C.voice); startSeg(seg); }
+  };
+  vol.oninput = () => {
+    $("rf-vol-i").textContent = +vol.value === 0 ? "volume_off" : (+vol.value < 50 ? "volume_down" : "volume_up");
+  };
+  vol.onchange = () => { save(); if (playing && voiceOn) startSeg(seg); };   // replay the line at the new volume
+  vol.oninput();
 })();
 </script>
 </body>
